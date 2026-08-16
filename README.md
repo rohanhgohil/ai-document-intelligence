@@ -399,6 +399,8 @@ The tests demonstrate that the same RAG + LLM architecture can process different
 
 The current MVP is optimized for **small and moderately sized, text-extractable documents**.
 
+**Local LLM inference can be slow on CPU-only systems, especially for larger documents.**
+
 Large OCR-heavy or poorly encoded PDFs can produce low-quality native PDF text. A 31-page OCR-heavy test document used during development produced garbled native PDF text and is therefore not yet handled reliably by the current native-extraction path.
 
 The next iteration will add a dedicated OCR fallback and page-aware processing strategy for these documents.
