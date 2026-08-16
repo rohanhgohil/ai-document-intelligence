@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pdfplumber
+pillow
+pytesseract
+python-dotenv
+requests
+pydantic>=2
+streamlit
+pandas
+numpy
+faiss-cpu
