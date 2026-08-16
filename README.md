@@ -1,90 +1,83 @@
-# AI Document Intelligence
+# 📄 AI Document Intelligence
 
 > **RAG-powered document intelligence system that converts business PDFs into structured, validated data using Ollama, Gemma 3, Nomic embeddings, FAISS, FastAPI, and Streamlit.**
 
 AI Document Intelligence is a local GenAI application for processing business documents and extracting useful structured information from unstructured PDFs.
 
-The system combines **document text extraction, dynamic document-header discovery, semantic retrieval, local embeddings, FAISS vector search, LLM-powered extraction, and Pydantic validation** in an end-to-end pipeline.
+The system combines **document text extraction, dynamic document-structure discovery, semantic retrieval, local embeddings, FAISS vector search, LLM-powered extraction, and Pydantic validation** into an end-to-end pipeline.
 
-## What It Demonstrates
+---
 
-* PDF text extraction with `pdfplumber`
-* OCR support for image inputs with `pytesseract`
-* Text cleaning and chunking
-* Dynamic document structure/header discovery
-* Embeddings with Ollama `nomic-embed-text`
-* Vector retrieval with FAISS
-* Structured extraction using Ollama `gemma3:4b`
-* JSON-constrained LLM output
-* Pydantic validation
-* FastAPI backend
-* Streamlit demo UI
+## 🚀 What It Demonstrates
 
-## Supported Document Types
+- PDF text extraction with `pdfplumber`
+- OCR support for image inputs with `pytesseract`
+- Text cleaning and chunking
+- Dynamic document structure/header discovery
+- Embeddings with Ollama `nomic-embed-text`
+- Vector retrieval with FAISS
+- Structured extraction using Ollama `gemma3:4b`
+- JSON-constrained LLM output
+- Truncated-JSON recovery for local LLM responses
+- Pydantic validation
+- FastAPI backend
+- Streamlit demo UI
 
-The current implementation has been successfully tested with:
+---
 
-* Invoice
-* Purchase Order
-* Payment Receipt
-* Delivery Note
-* Service Agreement
+## 🧪 Supported Test Documents
+
+The current implementation has been successfully tested with five small business-document examples:
+
+| Document Type | Result |
+|---|---|
+| Invoice | ✅ |
+| Purchase Order | ✅ |
+| Payment Receipt | ✅ |
+| Delivery Note | ✅ |
+| Service Agreement | ✅ |
 
 The goal is to process different business-document formats using a common AI pipeline rather than a single hard-coded invoice workflow.
 
-## Architecture
+---
+
+## 🏗️ Architecture
+
+![AI Document Intelligence Architecture](docs/architecture.png)
+
+### Pipeline
 
 ```text
-                    PDF / Image
-                        |
-                        v
-               Text Extraction
-                        |
-              +---------+---------+
-              |                   |
-              v                   v
-        PDF text              Image OCR
-       pdfplumber            pytesseract
-              |                   |
-              +---------+---------+
-                        |
-                        v
-               Text Cleaning
-                        |
-                        v
-             Document Structure
-                 Discovery
-                        |
-                        v
-                Chunking
-                        |
-                        v
-             Nomic Embeddings
-            (nomic-embed-text)
-                        |
-                        v
-                  FAISS Index
-                        |
-                        v
-              Semantic Retrieval
-                        |
-                        v
-                 Gemma 3 4B
-                  (Ollama)
-                        |
-                        v
-             Structured JSON
-                        |
-                        v
-             Pydantic Validation
-                        |
-                 +------+------+
-                 |             |
-                 v             v
-              FastAPI      Streamlit
+PDF / Image
+    ↓
+Text Extraction
+    ├── PDF → pdfplumber
+    └── Image → pytesseract OCR
+    ↓
+Text Cleaning + Normalization
+    ↓
+Dynamic Document Structure Discovery
+    ↓
+Chunking
+    ↓
+nomic-embed-text
+    ↓
+FAISS Vector Index
+    ↓
+Semantic Retrieval
+    ↓
+Gemma 3 4B
+    ↓
+Structured JSON
+    ↓
+Pydantic Validation
+    ↓
+FastAPI API / Streamlit UI
 ```
 
-## How It Works
+---
+
+## 🔎 How It Works
 
 ### 1. Document ingestion
 
@@ -96,15 +89,15 @@ For text-based PDFs, the system extracts text using `pdfplumber`.
 
 For image inputs, OCR can be performed using `pytesseract`.
 
-### 3. Document structure discovery
+### 3. Dynamic document structure discovery
 
-The system analyzes the document header and attempts to identify:
+The system analyzes the beginning/header section of a document and identifies:
 
-* document type
-* document title
-* important header fields
-* field values
-* confidence scores
+- document type
+- document title
+- important header fields
+- field values
+- confidence scores
 
 This allows the application to recognize different document structures instead of assuming every document is an invoice.
 
@@ -124,7 +117,9 @@ The embeddings are stored in an in-memory FAISS index.
 
 A semantic query is embedded and the most relevant document chunks are retrieved.
 
-### 6. LLM extraction
+The retrieved chunks are passed to the extraction model as grounded context.
+
+### 6. LLM-powered extraction
 
 The retrieved context is passed to:
 
@@ -134,13 +129,43 @@ gemma3:4b
 
 through Ollama.
 
-The model is instructed to return structured JSON using a predefined extraction schema.
+The model is instructed to return structured JSON using the application's extraction schema.
 
-### 7. Validation
+### 7. Validation and recovery
 
-The generated JSON is validated using Pydantic before being returned through the API.
+The generated response is:
 
-## Example Structured Output
+1. Parsed as JSON.
+2. Recovered when a local LLM truncates closing braces.
+3. Validated against the Pydantic extraction model.
+
+This helps the local CPU-based model produce reliable application output even when its response is not perfectly formatted.
+
+---
+
+---
+
+## 🖥️ Demo
+
+### Main Application
+
+![AI Document Intelligence — Main Application](docs/screenshots/app-main.png)
+
+The main interface demonstrates document upload, processing, and structured extraction output through the Streamlit application.
+
+### RAG Retrieval
+
+![RAG Retrieval](docs/screenshots/rag-retrieval.png)
+
+The retrieval view shows the relevant document chunks and similarity scores used to ground the LLM extraction.
+
+### Multi-Document Support
+
+![Multi-Document Support](docs/screenshots/multi-document.png)
+
+The application was tested across multiple document types including invoices, purchase orders, receipts, delivery notes, and service agreements.
+
+## 📦 Example Structured Output
 
 For an invoice:
 
@@ -176,22 +201,26 @@ For an invoice:
 }
 ```
 
-## Tech Stack
+---
 
-| Layer          | Technology       |
-| -------------- | ---------------- |
-| Language       | Python           |
-| PDF Extraction | pdfplumber       |
-| OCR            | pytesseract      |
-| LLM Runtime    | Ollama           |
-| LLM            | Gemma 3 4B       |
-| Embeddings     | nomic-embed-text |
-| Vector Search  | FAISS            |
-| Validation     | Pydantic         |
-| Backend        | FastAPI          |
-| Frontend       | Streamlit        |
+## 🛠️ Tech Stack
 
-## Project Structure
+| Layer | Technology |
+|---|---|
+| Language | Python |
+| PDF Extraction | pdfplumber |
+| OCR | pytesseract |
+| LLM Runtime | Ollama |
+| LLM | Gemma 3 4B |
+| Embeddings | nomic-embed-text |
+| Vector Search | FAISS |
+| Validation | Pydantic |
+| Backend | FastAPI |
+| Frontend | Streamlit |
+
+---
+
+## 📁 Project Structure
 
 ```text
 ai-document-intelligence/
@@ -220,13 +249,20 @@ ai-document-intelligence/
 │   ├── test_delivery_note.pdf
 │   └── test_service_agreement.pdf
 │
+├── docs/
+│   ├── architecture.png
+│   └── screenshots/
+│       └── app-main.png
+│
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
 └── README.md
 ```
 
-## Setup
+---
+
+## ⚙️ Setup
 
 ### 1. Clone the repository
 
@@ -294,9 +330,11 @@ OLLAMA_TIMEOUT=120
 OLLAMA_KEEP_ALIVE=30m
 ```
 
-Do not commit `.env` to GitHub.
+**Do not commit `.env` to GitHub.**
 
-## Run the Application
+---
+
+## ▶️ Run the Application
 
 ### Start FastAPI
 
@@ -324,34 +362,46 @@ In another terminal:
 streamlit run frontend/streamlit_app.py
 ```
 
-## Example API Request
+---
+
+## 🧪 Example API Request
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/extract" \
   -F "file=@test_documents/test_invoice.pdf"
 ```
 
-The API returns document metadata, retrieval information, extracted text preview, and validated structured data.
+The API returns:
 
-## Validation Performed
+- document metadata
+- extracted text preview
+- retrieved chunk information
+- structured extraction results
+- validated JSON data
+
+---
+
+## ✅ Validation Performed
 
 The current implementation has been tested successfully with five small business-document examples:
 
-| Document          | Result |
-| ----------------- | ------ |
-| Invoice           | ✅      |
-| Purchase Order    | ✅      |
-| Payment Receipt   | ✅      |
-| Delivery Note     | ✅      |
-| Service Agreement | ✅      |
+- **Invoice**
+- **Purchase Order**
+- **Payment Receipt**
+- **Delivery Note**
+- **Service Agreement**
 
-The tests demonstrate that the pipeline can process multiple document formats using the same underlying GenAI architecture.
+The tests demonstrate that the same RAG + LLM architecture can process different document formats without creating a separate application for each format.
 
-## Current Limitations
+---
 
-The current MVP is optimized for small and moderately sized documents.
+## ⚠️ Current Limitations
 
-Large OCR-heavy or poorly encoded PDFs may produce low-quality native PDF text and can require a dedicated OCR fallback and page-aware processing strategy.
+The current MVP is optimized for **small and moderately sized, text-extractable documents**.
+
+Large OCR-heavy or poorly encoded PDFs can produce low-quality native PDF text. A 31-page OCR-heavy test document used during development produced garbled native PDF text and is therefore not yet handled reliably by the current native-extraction path.
+
+The next iteration will add a dedicated OCR fallback and page-aware processing strategy for these documents.
 
 The current implementation therefore focuses on proving the core:
 
@@ -359,55 +409,62 @@ The current implementation therefore focuses on proving the core:
 Document → Retrieval → LLM → Structured Data
 ```
 
-pipeline.
+pipeline reliably on representative small business documents.
 
-## Roadmap
+---
 
-### v0.3 — Document robustness
+## 🗺️ Roadmap
 
-* [ ] Automatic PDF text-quality detection
-* [ ] OCR fallback for scanned/poorly encoded PDFs
-* [ ] Page-aware retrieval
-* [ ] Large-document processing
-* [ ] Better error handling
+### v0.3 — Document Robustness
 
-### v0.4 — Extraction intelligence
+- [ ] Automatic PDF text-quality detection
+- [ ] OCR fallback for scanned/poorly encoded PDFs
+- [ ] Page-aware retrieval
+- [ ] Large-document processing
+- [ ] Better error handling
 
-* [ ] Dynamic extraction schemas
-* [ ] Field-level confidence scoring
-* [ ] Field validation and normalization
-* [ ] Improved table extraction
-* [ ] Document classification
+### v0.4 — Extraction Intelligence
+
+- [ ] Dynamic extraction schemas
+- [ ] Field-level confidence scoring
+- [ ] Field validation and normalization
+- [ ] Improved table extraction
+- [ ] Document classification
 
 ### v0.5 — Productionization
 
-* [ ] Batch document processing
-* [ ] Persistent vector storage
-* [ ] Background processing
-* [ ] Database-backed document history
-* [ ] Authentication
-* [ ] Docker deployment
-* [ ] Cloud deployment
+- [ ] Batch document processing
+- [ ] Persistent vector storage
+- [ ] Background processing
+- [ ] Database-backed document history
+- [ ] Authentication
+- [ ] Docker deployment
+- [ ] Cloud deployment
 
-## Portfolio Positioning
+---
+
+## 🎯 Portfolio Positioning
 
 **AI Document Intelligence | RAG → Document Understanding → LLM Extraction → Structured Data**
 
 This project demonstrates practical GenAI engineering using:
 
-* Retrieval-Augmented Generation
-* Local LLMs
-* Semantic search
-* Vector databases
-* Document processing
-* Structured LLM output
-* Python backend development
-* FastAPI
-* Streamlit
+- Retrieval-Augmented Generation
+- Local LLM inference
+- Semantic search
+- Vector databases
+- Document processing
+- Dynamic document structure discovery
+- Structured LLM output
+- Python backend development
+- FastAPI
+- Streamlit
 
 The goal is to demonstrate how GenAI can be applied to real business-document workflows rather than building a generic chatbot.
 
-## Author
+---
+
+## 👤 Author
 
 **Rohan Gohil**
 
