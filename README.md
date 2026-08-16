@@ -267,7 +267,7 @@ ai-document-intelligence/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-document-intelligence.git
+git clone https://github.com/rohanhgohil/ai-document-intelligence.git
 cd ai-document-intelligence
 ```
 
